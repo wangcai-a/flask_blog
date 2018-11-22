@@ -1,18 +1,22 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
 from app.home import home as home_blueprint
 from app.admin import admin as admin_blueprint
+from config import config
 
 
-app = Flask(__name__)
-db = SQLAlchemy(app)
+bootstrap = Bootstrap()
+db = SQLAlchemy()
 
 
-app.register_blueprint(home_blueprint)
-app.register_blueprint(admin_blueprint, url_prefix="/admin")
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    app.register_blueprint(home_blueprint)
+    app.register_blueprint(admin_blueprint, url_prefix="/admin")
 
+    bootstrap.init_app(app)
+    db.init_app(app)
 
-# 404
-@app.errorhandler(404)
-def page_not_found(error):
-    return render_template("404.html"), 404
+    return app
